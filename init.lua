@@ -100,13 +100,14 @@ function RunBuildBat()
     end
     local parent_dir = start_dir:gsub('[^\\/]+$', '') -- Move up one directory
     if parent_dir == start_dir then
-      break -- Exit the loop if at root directory
+      break                                           -- Exit the loop if at root directory
     end
     start_dir = parent_dir
   end
 
   print 'build.bat not found in the directory tree.'
 end
+
 -- Search for build directory and launch main.exe
 function RunDevEnv()
   local start_dir = vim.fn.getcwd()
@@ -115,11 +116,11 @@ function RunDevEnv()
   while start_dir ~= '' do
     build_dir = start_dir .. 'build'
     if vim.fn.isdirectory(build_dir) == 1 then
-      break -- Exit the loop if build directory is found
+      break                                           -- Exit the loop if build directory is found
     end
     local parent_dir = start_dir:gsub('[^\\/]+$', '') -- Move up one directory
     if parent_dir == start_dir then
-      break -- Exit the loop if at root directory
+      break                                           -- Exit the loop if at root directory
     end
     start_dir = parent_dir
   end
@@ -137,6 +138,7 @@ function RunDevEnv()
     print 'Build directory not found in the directory tree.'
   end
 end
+
 -- Export functions to global scope
 _G.RunDevEnv = RunDevEnv
 _G.SearchBuildBat = SearchBuildBat
@@ -299,7 +301,7 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',    opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following lua:
@@ -334,7 +336,7 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
+  {                     -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
@@ -369,7 +371,7 @@ require('lazy').setup({
 
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
-        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
+        build = 'make',
 
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
@@ -380,7 +382,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -796,7 +798,7 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
     'morhetz/gruvbox',
-    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    lazy = false,    -- make sure we load this during startup if it is your main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
       -- Load the colorscheme here.
@@ -854,7 +856,6 @@ require('lazy').setup({
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
       ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.install').compilers = { 'clang' }
       require('nvim-treesitter.configs').setup {
         ensure_installed = { 'bash', 'c', 'cpp', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
         -- Autoinstall languages that are not installed
