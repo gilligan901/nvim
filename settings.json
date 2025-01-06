@@ -42,7 +42,7 @@
     {
         "defaults": 
         {
-            "backgroundImage": "WINDOWS_BACKGROUND_IMAGE_PATH",
+            "backgroundImage": "C:\\Users\\gilli\\bg.png",
             "backgroundImageOpacity": 0.1,
             "colorScheme": "Campbell",
             "cursorShape": "filledBox",

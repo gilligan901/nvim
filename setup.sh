@@ -1,19 +1,15 @@
 #!/bin/bash
 
 # Get the Windows username and convert to WSL path
-WINDOWS_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+WINDOWS_USER="gilli"
 WINDOWS_USER_DIR="/mnt/c/Users/$WINDOWS_USER"
 
-
-# Get the current directory where your script is running
-CURRENT_DIR="$PWD"
-
 # The string to find and replace (you can pass this as an argument)
-SEARCH_STRING="WINDOWS_BACKGROUND_IMAGE_PATH"
+SEARCH_STRING="BACKGROUND_IMAGE"
 
 # The Windows-style path where bg.png symlink will be
 # Convert /mnt/c/Users/username to C:\Users\username
-WINDOWS_STYLE_PATH="C:\\\\Users\\\\$WINDOWS_USER\\\\bg.png"
+WINDOWS_STYLE_PATH='C:\\\\Users\\\\'$WINDOWS_USER'\\\\bg.png'
 
 # Create symlink for settings.json
 # Searching for Windows Terminal settings location
@@ -27,13 +23,16 @@ if [ -z "$TERMINAL_DIR" ]; then
 fi
 
 # Replace the placeholder in settings.json with the Windows path
-sed -i "s|$SEARCH_STRING|$WINDOWS_STYLE_PATH|g" "$CURRENT_DIR/settings.json"
+sed -i "s|$SEARCH_STRING|$WINDOWS_STYLE_PATH|g" "./settings.json"
+
+cp -f "./settings.json" "$CURRENT_DIR/settings.json.tmp"
 
 # Create symlink for bg.png in user directory
-ln -sf "$CURRENT_DIR/bg.png" "$WINDOWS_USER_DIR/bg.png"
+cp -f "./bg.png" "$WINDOWS_USER_DIR/bg.png"
 
 # Create the symlink for settings.json
-ln -sf "$CURRENT_DIR/settings.json" "$TERMINAL_SETTINGS_PATH"
+cp -f "./settings.json.tmp" "$TERMINAL_SETTINGS_PATH"
 
+rm -f "./settings.json.tmp"
 
 echo "Setup complete!"
