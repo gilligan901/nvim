@@ -42,7 +42,7 @@
     {
         "defaults": 
         {
-            "backgroundImage": "%USERPROFILE%\\bg.png",
+            "backgroundImage": "WINDOWS_BACKGROUND_IMAGE_PATH",
             "backgroundImageOpacity": 0.1,
             "colorScheme": "Campbell",
             "cursorShape": "filledBox",
