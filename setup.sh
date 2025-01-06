@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get the Windows username and convert to WSL path
-WINDOWS_USER="gilli"
+WINDOWS_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
 WINDOWS_USER_DIR="/mnt/c/Users/$WINDOWS_USER"
 
 # The string to find and replace (you can pass this as an argument)
