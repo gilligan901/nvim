@@ -42,7 +42,7 @@
     {
         "defaults": 
         {
-            "backgroundImage": "C:\\Users\\gilli\\Pictures\\1334857.png",
+            "backgroundImage": "%USERPROFILE%\\bg.png",
             "backgroundImageOpacity": 0.1,
             "colorScheme": "Campbell",
             "cursorShape": "filledBox",
