@@ -1,4 +1,5 @@
 --[[
+-
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -100,14 +101,13 @@ function RunBuildBat()
     end
     local parent_dir = start_dir:gsub('[^\\/]+$', '') -- Move up one directory
     if parent_dir == start_dir then
-      break                                           -- Exit the loop if at root directory
+      break -- Exit the loop if at root directory
     end
     start_dir = parent_dir
   end
 
   print 'build.bat not found in the directory tree.'
 end
-
 -- Search for build directory and launch main.exe
 function RunDevEnv()
   local start_dir = vim.fn.getcwd()
@@ -116,11 +116,11 @@ function RunDevEnv()
   while start_dir ~= '' do
     build_dir = start_dir .. 'build'
     if vim.fn.isdirectory(build_dir) == 1 then
-      break                                           -- Exit the loop if build directory is found
+      break -- Exit the loop if build directory is found
     end
     local parent_dir = start_dir:gsub('[^\\/]+$', '') -- Move up one directory
     if parent_dir == start_dir then
-      break                                           -- Exit the loop if at root directory
+      break -- Exit the loop if at root directory
     end
     start_dir = parent_dir
   end
@@ -138,7 +138,6 @@ function RunDevEnv()
     print 'Build directory not found in the directory tree.'
   end
 end
-
 -- Export functions to global scope
 _G.RunDevEnv = RunDevEnv
 _G.SearchBuildBat = SearchBuildBat
@@ -152,7 +151,6 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
 
--- Make the background transparent
 vim.g.gruvbox_transparent_bg = 1
 vim.cmd [[
 autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
@@ -237,6 +235,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = vim.api.nvim_create_augroup('cutom-term-open', { clear = true }),
+  callback = function()
+    vim.opt.number = false
+    vim.opt.relativenumber = false
+    vim.opt.signcolumn = 'no'
+  end,
+})
 
 -- TIP: Disable arrow keys in normal mode
 vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -266,6 +272,21 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     vim.highlight.on_yank()
   end,
 })
+
+-- Create a custom command to open PowerShell
+vim.api.nvim_create_user_command('PowerShell', function()
+  vim.cmd 'terminal powershell.exe'
+end, { nargs = 0 })
+
+-- Create a quicker version of the PowerShell command
+vim.api.nvim_create_user_command('Pow', function()
+  vim.cmd 'terminal powershell.exe'
+end, { nargs = 0 })
+
+-- Create a custom command to open CMD
+vim.api.nvim_create_user_command('Cmd', function()
+  vim.cmd 'terminal cmd.exe'
+end, { nargs = 0 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -299,9 +320,9 @@ require('lazy').setup({
   --
   --  This is equivalent to:
   --    require('Comment').setup({})
-
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',    opts = {} },
+
+  { 'numToStr/Comment.nvim', opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following lua:
@@ -336,19 +357,52 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
+      local wk = require 'which-key'
+      wk.setup()
+
+      -- Add your mappings
+      wk.add {
+        { '<leader>f', group = 'file' }, -- group
+        { '<leader>ff', '<cmd>Telescope find_files<cr>', desc = 'Find File', mode = 'n' },
+        {
+          '<leader>fb',
+          function()
+            print 'hello'
+          end,
+          desc = 'Foobar',
+        },
+        { '<leader>fn', desc = 'New File' },
+        { '<leader>f1', hidden = true }, -- hide this keymap
+        { '<leader>w', proxy = '<c-w>', group = 'windows' }, -- proxy to window mappings
+        {
+          '<leader>b',
+          group = 'buffers',
+          expand = function()
+            return require('which-key.extras').expand.buf()
+          end,
+        },
+        {
+          -- Nested mappings are allowed and can be added in any order
+          -- Most attributes can be inherited or overridden on any level
+          -- There's no limit to the depth of nesting
+          mode = { 'n', 'v' }, -- NORMAL and VISUAL mode
+          { '<leader>q', '<cmd>q<cr>', desc = 'Quit' }, -- no need to specify mode since it's inherited
+          { '<leader>w', '<cmd>w<cr>', desc = 'Write' },
+        },
+      }
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      wk.add {
+        { '', group = '[C]ode' },
+        { '', group = '[S]earch' },
+        { '', group = '[W]orkspace' },
+        { '', group = '[R]ename' },
+        { '', group = '[D]ocument' },
+        { '', desc = '', hidden = true, mode = { 'n', 'n', 'n', 'n', 'n' } },
       }
     end,
   },
@@ -371,7 +425,7 @@ require('lazy').setup({
 
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
-        build = 'make',
+        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
 
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
@@ -382,7 +436,7 @@ require('lazy').setup({
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -444,7 +498,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to telescope to change theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
+          theme = 'gruvbox',
           previewer = false,
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
@@ -599,14 +653,6 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
-        intelephense = {},
-        phpactor = {},
-        html = {
-          filetypes = { 'html', 'php', 'templ' },
-        },
-        htmx = {},
-        tailwindcss = {},
-
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -797,19 +843,30 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    'morhetz/gruvbox',
-    lazy = false,    -- make sure we load this during startup if it is your main colorscheme
+    'ellisonleao/gruvbox.nvim',
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'gruvbox'
+
+      -- You can configure highlights by doing something like
+      vim.cmd.hi 'Comment gui=none'
     end,
+  },
+  ui = {
+    backdrop = 50, -- Adjust this value to control the transparency
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -849,30 +906,34 @@ require('lazy').setup({
     end,
   },
 
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     config = function()
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-
       ---@diagnostic disable-next-line: missing-fields
+      require('nvim-treesitter.install').compilers = { 'clang' }
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'bash', 'c', 'cpp', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
+        ensure_installed = { 'bash', 'c', 'cpp', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'php', 'powershell' },
         -- Autoinstall languages that are not installed
         auto_install = true,
+        sync_install = false, -- Added: Install parsers synchronously
+        ignore_install = {}, -- Added: List of parsers to ignore installing
+        modules = {}, -- Added: Custom modules
         highlight = { enable = true },
         indent = { enable = true },
       }
-
-      -- There are additional nvim-treesitter modules that you can use to interact
-      -- with nvim-treesitter. You should go explore a few and see what interests you:
-      --
-      --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-      --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-      --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-
+  {
+    'stevearc/oil.nvim',
+    ---@module 'oil'
+    ---@type oil.SetupOpts
+    opts = {},
+    -- Optional dependencies
+    dependencies = { { 'echasnovski/mini.icons', opts = {} } },
+    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
+  },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- put them in the right spots if you want.
