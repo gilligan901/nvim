@@ -241,6 +241,7 @@ return {
 
       -- Define server configurations
       local servers = {
+        clangd = {},
         lua_ls = {
           settings = {
             Lua = {
@@ -257,6 +258,73 @@ return {
               },
             },
           },
+        },
+        omnisharp = {
+          cmd = {
+            vim.fn.stdpath 'data' .. '/mason/bin/OmniSharp',
+            '--languageserver',
+            '--hostPID',
+            tostring(vim.fn.getpid()),
+          },
+          enable_roslyn_analyzers = true,
+          organize_imports_on_format = true,
+          enable_import_completion = true,
+          settings = {
+            FormattingOptions = {
+              EnableEditorConfigSupport = true,
+              OrganizeImports = true,
+            },
+            MsBuild = {
+              LoadProjectsOnDemand = false,
+            },
+            RoslynExtensionsOptions = {
+              EnableAnalyzersSupport = true,
+              EnableImportCompletion = true,
+              AnalyzeOpenDocumentsOnly = false,
+            },
+            Sdk = {
+              IncludePrereleases = true,
+            },
+          },
+          on_attach = function(client, bufnr)
+            vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+            local opts = { noremap = true, silent = true, buffer = bufnr }
+            vim.keymap.set('n', '<leader>cu', function()
+              vim.lsp.buf.execute_command {
+                command = 'o#/restoreproject',
+                arguments = { vim.uri_from_bufnr(0) },
+              }
+            end, { desc = 'Restore project', buffer = bufnr })
+          end,
+        },
+        powershell_es = {
+          cmd = {
+            'pwsh',
+            '-NoProfile',
+            '-Command',
+            'PowerShellEditorServices.Host.Start-EditorServicesHost -HostName neovim -HostProfileId Default -LogLevel Verbose -LogPath '
+              .. vim.fn.stdpath 'cache'
+              .. '/powershell_es.log -SessionDetailsPath '
+              .. vim.fn.stdpath 'cache'
+              .. '/powershell_es_session.json',
+          },
+          filetypes = { 'powershell', 'ps1' },
+          root_dir = require('lspconfig.util').root_pattern('.git', '.vscode', '.psd1', '.psm1'),
+          settings = {
+            powershell = {
+              codeFormatting = {
+                openBraceOnSameLine = true,
+                newLineAfterOpenBrace = true,
+                newLineAfterCloseBrace = true,
+              },
+              scriptAnalysis = {
+                enable = true,
+              },
+            },
+          },
+          on_attach = function(client, bufnr)
+            -- PowerShell-specific setup if needed
+          end,
         },
       }
 
