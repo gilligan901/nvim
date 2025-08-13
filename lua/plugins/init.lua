@@ -86,6 +86,12 @@ return {
     },
     config = function()
       require('telescope').setup {
+        defaults = {
+          file_ignore_patterns = { '%.pak$', '%.bin$' }, -- ignore .pak files
+          preview = {
+            filesize_limit = 0.1, -- limit preview to 0.1MB files
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -298,34 +304,9 @@ return {
           end,
         },
         powershell_es = {
-          cmd = {
-            'pwsh',
-            '-NoProfile',
-            '-Command',
-            'PowerShellEditorServices.Host.Start-EditorServicesHost -HostName neovim -HostProfileId Default -LogLevel Verbose -LogPath '
-              .. vim.fn.stdpath 'cache'
-              .. '/powershell_es.log -SessionDetailsPath '
-              .. vim.fn.stdpath 'cache'
-              .. '/powershell_es_session.json',
-          },
-          filetypes = { 'powershell', 'ps1' },
-          root_dir = require('lspconfig.util').root_pattern('.git', '.vscode', '.psd1', '.psm1'),
-          settings = {
-            powershell = {
-              codeFormatting = {
-                openBraceOnSameLine = true,
-                newLineAfterOpenBrace = true,
-                newLineAfterCloseBrace = true,
-              },
-              scriptAnalysis = {
-                enable = true,
-              },
-            },
-          },
-          on_attach = function(client, bufnr)
-            -- PowerShell-specific setup if needed
-          end,
+          cmd_extra_args = { '-LogLevel', 'Warning' },
         },
+        pyright = {},
       }
 
       -- Setup Mason
@@ -369,7 +350,7 @@ return {
       notify_on_error = false,
       format_on_save = {
         timeout_ms = 500,
-        lsp_fallback = true, -- Changed this back to true, but you can set to false for debugging
+        lsp_fallback = true,
       },
       formatters_by_ft = {
         lua = { 'stylua' },
@@ -385,12 +366,7 @@ return {
     dependencies = {
       {
         'L3MON4D3/LuaSnip',
-        build = (function()
-          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
-            return
-          end
-          return 'make install_jsregexp'
-        end)(),
+        build = 'make install_jsregexp', -- Remove the conditional logic
       },
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
@@ -466,7 +442,6 @@ return {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter.install').compilers = { 'clang' }
       require('nvim-treesitter.configs').setup {
         ensure_installed = { 'bash', 'c', 'cpp', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'php', 'powershell', 'c_sharp' },
         auto_install = true,
